@@ -1,0 +1,87 @@
+import { Body, ConflictException, Controller, Get, Post, Req, Res, Session, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { RegistrationUsecase } from './usecases/registration.usecase';
+import { LoginUsecase } from './usecases/login.usecase';
+import { LoginDto, RegisterDto } from './dto/auth.dto';
+import type { Request, Response } from 'express';
+import { LogoutUsecase } from './usecases/logout.usecase';
+import { SessionAuthGuard } from './guards/session-auth.guards';
+import { PrismaService } from 'src/utils/prisma.service';
+
+@Controller('auth')
+export class AuthController {
+    constructor(
+        private readonly registerUsecase: RegistrationUsecase,
+        private readonly loginUsecase: LoginUsecase,
+        private readonly logoutUsecase: LogoutUsecase,
+        private readonly prisma: PrismaService
+    ) {}
+
+    @Post('registration')
+    async registerUser(@Body() userData: RegisterDto) {
+        try {
+            if(await this.registerUsecase.createUser(userData)) {
+                return {
+                    message: 'User has been created',
+                    result: true
+                }
+            }
+        } catch(err) {
+            if (err instanceof ConflictException) {
+                console.log(err);
+                return err;
+            } else {
+                return 'Something went wrong';
+            }
+        }
+    }
+
+    @Post('login')
+    async loginUser(@Body() userData: LoginDto, @Req() request: Request) {
+        try {
+            const user = await this.loginUsecase.login(userData);
+
+            request.session.userId = user.id;
+            request.session.username = user.username;
+
+            return user;
+        } catch (err) {
+            if (err instanceof UnauthorizedException) {
+                console.log(err);
+                throw err;
+            } else {
+                return 'Something went wrong';
+            }
+        }
+    }
+
+    @Post('logout')
+    async logoutUser(
+        @Req() request: Request,
+        @Res({ passthrough: true }) response: Response
+    ) {
+        try {
+            await this.logoutUsecase.logout(request);
+
+            response.clearCookie('sid');
+
+            return { message: 'Logged out' };
+        } catch (err) {
+            return 'Something went wrong';
+        }
+    }
+
+    @Get('me')
+    @UseGuards(SessionAuthGuard)
+    async me(@Req() req: Request) {
+        const user = await this.prisma.user.findUnique({
+            where: { id: req.session.userId },
+            select: {
+                id: true,
+                username: true,
+                CreatedAt: true,
+            },
+        });
+
+        return user;
+    }
+}
