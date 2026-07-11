@@ -1,1 +1,14 @@
 @import "tailwindcss";
+
+.login_container{
+  width: 100lvw;
+  height: 100lvh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background-color: --background-color; /* Базовый глубокий темный фон (можешь убрать, если используешь var) */
+  background-image: 
+    radial-gradient(at 15% 20%, rgba(22, 65, 255, 0.2) 0px, transparent 50%),
+    radial-gradient(at 85% 80%, rgba(255, 61, 245, 0.2) 0px, transparent 50%);
+}
