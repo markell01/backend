@@ -22,15 +22,19 @@ export class AuthController {
             if(await this.registerUsecase.createUser(userData)) {
                 return {
                     message: 'User has been created',
-                    result: true
+                    statusCode: 201
                 }
             }
         } catch(err) {
             if (err instanceof ConflictException) {
-                console.log(err);
-                return err;
-            } else {
-                return 'Something went wrong';
+                return {
+                    message: err.message,
+                    statusCode: 409
+                };
+            }
+            return {
+                message: 'Something went wrong',
+                statusCode: 500
             }
         }
     }
@@ -43,13 +47,21 @@ export class AuthController {
             request.session.userId = user.id;
             request.session.username = user.username;
 
-            return user;
+            return {
+                message: 'Success',
+                statusCode: 200,
+                user
+            };
         } catch (err) {
             if (err instanceof UnauthorizedException) {
-                console.log(err);
-                throw err;
-            } else {
-                return 'Something went wrong';
+                return {
+                    message: err.message,
+                    statusCode: 401
+                }
+            }
+            return {
+                message: 'Something went wrong',
+                statusCode: 500
             }
         }
     }
@@ -64,24 +76,41 @@ export class AuthController {
 
             response.clearCookie('sid');
 
-            return { message: 'Logged out' };
+            return {
+                message: 'Logged out',
+                statusCode: 200
+            };
         } catch (err) {
-            return 'Something went wrong';
+            return {
+                message: 'Something went wrong',
+                statusCode: 500
+            };
         }
     }
 
     @Get('me')
     @UseGuards(SessionAuthGuard)
     async me(@Req() req: Request) {
-        const user = await this.prisma.user.findUnique({
-            where: { id: req.session.userId },
-            select: {
-                id: true,
-                username: true,
-                CreatedAt: true,
-            },
-        });
+        try {
+            const user = await this.prisma.user.findUnique({
+                where: { id: req.session.userId },
+                select: {
+                    id: true,
+                    username: true,
+                    CreatedAt: true,
+                },
+            });
 
-        return user;
+            return {
+                message: 'Success',
+                statusCode: 200,
+                user
+            };
+        } catch (err) {
+            return {
+                message: 'Something went wrong',
+                statusCode: 500
+            };
+        }
     }
 }
