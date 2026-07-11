@@ -27,15 +27,9 @@ export class AuthController {
             }
         } catch(err) {
             if (err instanceof ConflictException) {
-                return {
-                    message: err.message,
-                    statusCode: 409
-                };
+                throw err;
             }
-            return {
-                message: 'Something went wrong',
-                statusCode: 500
-            }
+            throw err;
         }
     }
 
@@ -54,15 +48,9 @@ export class AuthController {
             };
         } catch (err) {
             if (err instanceof UnauthorizedException) {
-                return {
-                    message: err.message,
-                    statusCode: 401
-                }
+                throw err;
             }
-            return {
-                message: 'Something went wrong',
-                statusCode: 500
-            }
+            throw err;
         }
     }
 
@@ -81,10 +69,7 @@ export class AuthController {
                 statusCode: 200
             };
         } catch (err) {
-            return {
-                message: 'Something went wrong',
-                statusCode: 500
-            };
+            throw err;
         }
     }
 
@@ -107,10 +92,7 @@ export class AuthController {
                 user
             };
         } catch (err) {
-            return {
-                message: 'Something went wrong',
-                statusCode: 500
-            };
+            throw err;
         }
     }
 }
