@@ -3,6 +3,7 @@ import { authService } from "../services/auth.service";
 import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router";
 import { TailSpin } from "react-loader-spinner";
+import { isAxiosError } from "axios";
 
 export default function Registration() {
   const [username, setUsername] = useState("");
@@ -22,16 +23,21 @@ export default function Registration() {
       await authService.register(data);
 
       toast.success("Вы успешно зарегистрировались!", {
-        position: "top-right",
         containerId: "app-toast",
       });
 
       navigate("/login");
     } catch (err) {
-      toast.error("Error Notification !", {
-        position: "top-right",
-        containerId: "app-toast",
-      });
+      if (isAxiosError(err) && err.response?.status === 409) {
+        toast.error("Пользователь с таким логином уже существует!", {
+          containerId: "app-toast",
+        });
+      } else {
+        toast.error("Что то пошло не так!", {
+          containerId: "app-toast",
+        });
+      }
+
       console.error(err);
     } finally {
       setIsLoading(false);

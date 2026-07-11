@@ -3,6 +3,7 @@ import { authService } from "../services/auth.service";
 import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router";
 import { TailSpin } from "react-loader-spinner";
+import { isAxiosError } from "axios";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -20,17 +21,23 @@ export default function Login() {
 
     try {
       await authService.login(data);
-      
+
       toast.success("Вы успешно вошли!", {
         containerId: "app-toast",
       });
 
       navigate("/");
     } catch (err) {
-      toast.error("Что-то пошло не так!", {
-        position: "top-right",
-        containerId: "app-toast",
-      });
+      if (isAxiosError(err) && err.response?.status === 401) {
+        toast.error("Неправильный логин или пароль!", {
+          containerId: "app-toast",
+        });
+      } else {
+        toast.error("Что-то пошло не так!", {
+          containerId: "app-toast",
+        });
+      }
+
       console.error(err);
     } finally {
       setIsLoading(false);
