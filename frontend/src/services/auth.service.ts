@@ -1,4 +1,4 @@
-import { api } from "./api"
+import { instance } from "./instance"
 
 type LoginDto= {
   username: string,
@@ -7,18 +7,18 @@ type LoginDto= {
 
 export const authService = {
   login(data: LoginDto) {
-    return api.post('/auth/login', data);
+    return instance.post('/auth/login', data);
   },
 
   register(data: LoginDto) {
-    return api.post('/auth/registration', data);
+    return instance.post('/auth/registration', data);
   },
 
   logout() {
-    return api.post('/auth/logout');
+    return instance.post('/auth/logout');
   },
 
   me() {
-    return api.get('/me');
+    return instance.get('/me');
   }
 }
