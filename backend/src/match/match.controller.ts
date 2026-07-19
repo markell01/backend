@@ -8,7 +8,6 @@ export class MatchController {
     constructor(private readonly matchService: MatchService) {}
 
     @Get('text')
-    @UseGuards(SessionAuthGuard)
     async getText() {
         try {
             const data = await this.matchService.textGenerator();
@@ -19,18 +18,16 @@ export class MatchController {
     }
 
     @Post('create')
-    @UseGuards(SessionAuthGuard)
     async createMatch(@Body() body: MatchDto) {
         try {
-            await this.matchService.createMatch(body);
-            return true;
+            const match = await this.matchService.createMatch(body);
+            return match;
         } catch (err) {
             throw err;
         }
     }
 
     @Patch(':id/update')
-    @UseGuards(SessionAuthGuard)
     async updateData(
         @Param('id') id: string,
         @Body() body: MatchUpdateDto
@@ -43,7 +40,6 @@ export class MatchController {
     }
 
     @Patch(':id/finish')
-    @UseGuards(SessionAuthGuard)
     async finish(
         @Param('id') id: string,
         @Body() body: SaveResultDto

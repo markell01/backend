@@ -24,10 +24,6 @@ export class SaveResultDto {
 }
 
 export class MatchDto {
-    @IsOptional()
-    @IsString()
-    status?: string
-
     @IsNumber()
     time!: number
 

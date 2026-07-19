@@ -3,12 +3,17 @@ import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from
 @Injectable()
 export class SessionAuthGuard implements CanActivate {
     canActivate(context: ExecutionContext): boolean {
-        const request = context.switchToHttp().getRequest();
+        try {
+            const request = context.switchToHttp().getRequest();
         
-        if (!request.session?.userId) {
-            throw new UnauthorizedException('Unauthorized');
+            if (!request.session?.userId) {
+                throw new UnauthorizedException('Unauthorized');
+            }
+            
+            return true
+        } catch (err) {
+            console.error(err);
+            throw err;
         }
-        
-        return true
     }
 }

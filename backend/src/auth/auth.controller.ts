@@ -74,7 +74,6 @@ export class AuthController {
     }
 
     @Get('me')
-    @UseGuards(SessionAuthGuard)
     async me(@Req() req: Request) {
         try {
             const user = await this.prisma.user.findUnique({
@@ -92,6 +91,7 @@ export class AuthController {
                 user
             };
         } catch (err) {
+            console.error(err);
             throw err;
         }
     }
