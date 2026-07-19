@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import { readFile } from "fs/promises";
 import { join } from "path";
 import { MATCH_UPDATE_STATUSES, MatchDto, MatchUpdateDto, SaveResultDto } from "./dto/match.dto";
-import { PrismaService } from "src/utils/prisma.service";
+import { PrismaService } from "../utils/prisma.service";
 
 @Injectable()
 export class MatchService {

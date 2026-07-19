@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Patch, Post, UseGuards } from "@nestjs/common";
 import { MatchService } from "./match.service";
 import { MatchDto, MatchUpdateDto, SaveResultDto } from "./dto/match.dto";
-import { SessionAuthGuard } from "src/auth/guards/session-auth.guards";
+import { SessionAuthGuard } from "../auth/guards/session-auth.guards";
 
 @Controller('match')
 export class MatchController {

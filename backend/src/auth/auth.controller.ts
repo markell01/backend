@@ -5,7 +5,7 @@ import { LoginDto, RegisterDto } from './dto/auth.dto';
 import type { Request, Response } from 'express';
 import { LogoutUsecase } from './usecases/logout.usecase';
 import { SessionAuthGuard } from './guards/session-auth.guards';
-import { PrismaService } from 'src/utils/prisma.service';
+import { PrismaService } from '../utils/prisma.service';
 
 @Controller('auth')
 export class AuthController {

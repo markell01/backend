@@ -11,7 +11,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
 
   app.enableCors({
-    origin: 'http://192.168.0.83:5173',
+    origin: 'http://192.168.0.144:5173',
     credentials: true
   })
 
