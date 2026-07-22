@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { authService } from "../services/auth.service";
 import { RotateCcw, Timer } from "lucide-react";
+import { soloMatchService } from "../services/soloMatch.service";
 
 interface statusCssMapType {
   correct: string;
@@ -19,25 +19,92 @@ const INITIAL_TIME = 60;
 export default function Match() {
   const [inputValue, setInputValue] = useState("");
   const [words, setWords] = useState("");
+  const [matchId, setMatchId] = useState("");
 
   const [timeLeft, setTimeLeft] = useState(INITIAL_TIME);
   const [isStarted, setIsStarted] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
+
+  const totalKeystrokesRef = useRef(0);
+  const correctKeystrokesRef = useRef(0);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const currentLetterRef = useRef<HTMLSpanElement>(null);
 
   const createMatch = async () => {
     try {
-      if (localStorage.getItem("id")) {
-        const response = await authService.createMatch({
-          userId: localStorage.getItem("id"),
-        });
-        console.log(response);
+      const userId = localStorage.getItem("id");
+      if (userId) {
+        const response = await soloMatchService.createMatch({ userId });
         setWords(response.data.text);
+        setMatchId(response.data.match.id);
       }
     } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const startMatch = async () => {
+    try {
+      await soloMatchService.startMatch({ matchId });
+    } catch (error) {
       console.log(error);
+    }
+  };
+
+  const finishMatch = async () => {
+    try {
+      const userId = localStorage.getItem("id");
+      if (!userId || !matchId) return;
+
+      let correctChars = 0;
+      let mistakes = 0;
+
+      // Считаем правильные и ошибочные символы
+      inputValue.split("").forEach((char, index) => {
+        if (char === words[index]) {
+          correctChars++;
+        } else {
+          mistakes++;
+        }
+      });
+
+      const elapsedTime = INITIAL_TIME - timeLeft || 1; // Защита от деления на 0
+
+      // 2. Точность всех нажатий клавиш (%)
+      const accuracy =
+        totalKeystrokesRef.current > 0
+          ? Math.round(
+              (correctKeystrokesRef.current / totalKeystrokesRef.current) * 100,
+            )
+          : 0;
+
+      // 3. Символы в минуту (CPM)
+      const cpm = Math.round((correctChars / elapsedTime) * 60);
+
+      const countWords = (inputValue: string) => {
+        return inputValue
+          .trim()
+          .split(/\s+/)
+          .filter((word) => word !== "").length;
+      };
+
+      const wordsCount = countWords(inputValue);
+
+      const wpm = Math.round((wordsCount / elapsedTime) * 60);
+
+      const payload = {
+        userId,
+        correctChars,
+        accuracy,
+        mistakes,
+        cpm,
+        wpm,
+      };
+
+      await soloMatchService.finishMatch(matchId, payload);
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -50,6 +117,8 @@ export default function Match() {
     setTimeLeft(INITIAL_TIME);
     setIsStarted(false);
     setIsFinished(false);
+    totalKeystrokesRef.current = 0;
+    correctKeystrokesRef.current = 0;
     createMatch();
 
     setTimeout(() => {
@@ -67,6 +136,7 @@ export default function Match() {
     } else if (timeLeft === 0 && isStarted) {
       setIsFinished(true);
       setIsStarted(false);
+      finishMatch();
     }
 
     return () => clearInterval(timer);
@@ -79,6 +149,16 @@ export default function Match() {
 
     if (!isStarted && val.length > 0) {
       setIsStarted(true);
+      startMatch();
+    }
+
+    if (val.length > inputValue.length) {
+      const addedCharIndex = val.length - 1;
+      totalKeystrokesRef.current += 1;
+
+      if (val[addedCharIndex] === words[addedCharIndex]) {
+        correctKeystrokesRef.current += 1;
+      }
     }
 
     setInputValue(val);
@@ -103,7 +183,7 @@ export default function Match() {
 
     window.addEventListener("click", handleGlobalClick);
     return () => window.removeEventListener("click", handleGlobalClick);
-  }, []);
+  }, [isFinished]);
 
   useEffect(() => {
     if (currentLetterRef.current && !isFinished) {

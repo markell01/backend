@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { User, LogOut, Swords } from "lucide-react"; // Swords отлично подойдет для игры "Printing Duel"
 import { useAuthModal } from "../context/AuthModalContext";
+import { useNavigate } from "react-router";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -9,6 +10,8 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   const { openAuthModal } = useAuthModal();
   const [userName, setUserName] = React.useState<string>("");
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Подтягиваем имя пользователя из localStorage при монтировании
@@ -27,7 +30,10 @@ const Layout = ({ children }: LayoutProps) => {
       <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           {/* Логотип / Название игры */}
-          <div className="flex items-center gap-2.5 cursor-pointer hover:opacity-90 transition-opacity">
+          <div
+            onClick={() => navigate("/")}
+            className="flex items-center gap-2.5 cursor-pointer hover:opacity-90 transition-opacity"
+          >
             <div className="p-2 bg-indigo-50 rounded-xl text-indigo-600">
               <Swords className="w-5 h-5" />
             </div>
@@ -66,7 +72,9 @@ const Layout = ({ children }: LayoutProps) => {
             ) : (
               // Если гость
               <button
-                onClick={() => {openAuthModal()}}
+                onClick={() => {
+                  openAuthModal();
+                }}
                 className="flex gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2 px-4 rounded-xl"
               >
                 <User className="w-5 h-5" />

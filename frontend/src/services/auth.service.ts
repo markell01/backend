@@ -5,10 +5,6 @@ type LoginDto = {
   password: string;
 };
 
-type matchDto = {
-  userId: string | null;
-};
-
 export const authService = {
   login(data: LoginDto) {
     return instance.post("/auth/login", data);
@@ -24,13 +20,5 @@ export const authService = {
 
   me() {
     return instance.get("/auth/me");
-  },
-
-  createMatch(data: matchDto) {
-    return instance.post("/match/create", data);
-  },
-
-  startMatch(data: matchDto) {
-    return instance.post(`/match/update&id=${data.userId}`);
   },
 };
