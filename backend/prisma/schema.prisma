@@ -13,6 +13,36 @@ model User {
   username  String   @unique
   password  String
   CreatedAt DateTime @default(now())
+  results   UserResult[]
+  matches   Match[]
 
   @@map("user")
+}
+
+model UserResult {
+  id            String @id @default(uuid())
+  result        Float
+  correctChars  Float
+  accuracy      Float
+  mistakes      Float
+  cpm           Float
+  user          User @relation(fields: [userId], references: [id])
+  userId        String
+  results       Match[]
+
+  @@map("user_result")
+}
+
+model Match {
+  id        String @id @default(uuid())
+  status    String @default("PENDING")
+  time      Int
+  user      User @relation(fields: [userId], references: [id])
+  userId    String
+  result    UserResult? @relation(fields: [resultId], references: [id])
+  resultId  String?
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt
+
+  @@map("match")
 }
