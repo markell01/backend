@@ -1,11 +1,8 @@
-import { IsIn, IsNumber, IsOptional, IsString } from "class-validator"
-
-export const MATCH_UPDATE_STATUSES = ['ACTIVE', 'CANCELED'] as const;
-export type MatchUpdateStatus = (typeof MATCH_UPDATE_STATUSES)[number];
+import { IsNumber, IsString } from "class-validator"
 
 export class SaveResultDto {
     @IsNumber()
-    result!: number
+    wpm!: number
 
     @IsNumber()
     correctChars!: number
@@ -24,15 +21,6 @@ export class SaveResultDto {
 }
 
 export class MatchDto {
-    @IsNumber()
-    time!: number
-
     @IsString()
     userId!: string
-}
-
-export class MatchUpdateDto {
-    @IsIn(MATCH_UPDATE_STATUSES)
-    @IsString()
-    status!: MatchUpdateStatus
 }

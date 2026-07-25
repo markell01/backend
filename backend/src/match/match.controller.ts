@@ -1,53 +1,33 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Logger, Param, Patch, Post } from "@nestjs/common";
 import { MatchService } from "./match.service";
-import { MatchDto, MatchUpdateDto, SaveResultDto } from "./dto/match.dto";
-import { SessionAuthGuard } from "../auth/guards/session-auth.guards";
+import { MatchDto, SaveResultDto } from "./dto/match.dto";
 
 @Controller('match')
 export class MatchController {
     constructor(private readonly matchService: MatchService) {}
 
-    @Get('text')
-    async getText() {
-        try {
-            const data = await this.matchService.textGenerator();
-            return data;
-        } catch (err) {
-            throw err;
-        }
-    }
-
     @Post('create')
-    async createMatch(@Body() body: MatchDto) {
-        try {
-            const match = await this.matchService.createMatch(body);
-            return match;
-        } catch (err) {
-            throw err;
-        }
+    async createMatch(@Body() data: MatchDto) {
+        return await this.matchService.createMatch(data);
     }
 
-    @Patch(':id/update')
-    async updateData(
-        @Param('id') id: string,
-        @Body() body: MatchUpdateDto
-    ) {
-        try {
-            return await this.matchService.updateMatchData(body, id);
-        } catch (err) {
-            throw err;
-        }
+    @Patch(':id/start')
+    async updateData(@Param('id') id: string) {
+        return await this.matchService.updateMatchData(id);
     }
 
     @Patch(':id/finish')
-    async finish(
-        @Param('id') id: string,
-        @Body() body: SaveResultDto
-    ) {
-        try {
-            return await this.matchService.saveResult(body, id);
-        } catch (err) {
-            throw err;
-        }
+    async finish(@Param('id') id: string, @Body() body: SaveResultDto) {
+        return await this.matchService.saveResult(body, id);
+    }
+
+    @Get('leaderboard')
+    async getUsers() {
+        return { goats: await this.matchService.getBestUsers() }
+    }
+
+    @Get('user_history/:id')
+    async matchHistory(@Param('id') id: string) {
+        return this.matchService.userMatchHostory(id);
     }
 }

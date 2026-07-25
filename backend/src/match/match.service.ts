@@ -1,14 +1,16 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { readFile } from "fs/promises";
 import { join } from "path";
-import { MATCH_UPDATE_STATUSES, MatchDto, MatchUpdateDto, SaveResultDto } from "./dto/match.dto";
+import { MatchDto, SaveResultDto } from "./dto/match.dto";
 import { PrismaService } from "../utils/prisma.service";
+import { CustomLogger } from "../config/config.logger";
 
 @Injectable()
 export class MatchService {
+    private readonly logger = new CustomLogger(MatchService.name);
     constructor(private readonly prisma: PrismaService) {}
    
-    async textGenerator() {
+    private async textGenerator() {
         const filePath = join(process.cwd(), 'public', 'text.txt');
 
         const text = (await readFile(filePath, 'utf8'))
@@ -17,12 +19,23 @@ export class MatchService {
         .filter(Boolean);
 
         const words: string[] = [];
+        const wordLimit = this.getWordLimit();
         
-        while (words.length < 1000) {
+        while (words.length < wordLimit) {
             words.push(text[this.getRandomInt(text.length)]);
         }
 
-        return { text: words.join(' ') };
+        return words.join(' ');
+    }
+
+    private getWordLimit() {
+        const limit = Number(process.env.WORD_LIMIT);
+
+        if (!Number.isFinite(limit) || limit <= 0) {
+            return 300;
+        }
+
+        return limit;
     }
 
     private getRandomInt(length: number) {
@@ -30,7 +43,12 @@ export class MatchService {
     }
 
     async createMatch(data: MatchDto) {
-        return await this.prisma.match.create({ data })
+        const text = await this.textGenerator();
+        const match = await this.prisma.match.create({ data });
+        return {
+            match,
+            text
+        }
     }
 
     async saveResult(data: SaveResultDto, id: string) {
@@ -47,24 +65,47 @@ export class MatchService {
         });
     }
 
-    async updateMatchData(data: MatchUpdateDto, matchId: string) {
-        if (!MATCH_UPDATE_STATUSES.includes(data.status)) {
-            throw new BadRequestException('Invalid match status');
-        }
-
+    async updateMatchData(matchId: string) {
         const result = await this.prisma.match.update({
-            where: {
-                id: matchId
-            },
-            data: {
-                status: data.status
-            }
-        })
+            where: { id: matchId },
+            data: { status: 'ACTIVE' }
+        });
 
         if (!result) {
+            this.logger.error('Invalid match id');
             throw new BadRequestException();
         }
 
         return true;
+    }
+
+    async getBestUsers() {
+        return this.prisma.userResult.findMany({
+            orderBy: [
+                { wpm: 'desc' },
+                { accuracy: 'desc' },
+                { cpm: 'desc' },
+            ],
+            take: 10,
+            include: {
+                user: {
+                    select: {
+                        username: true,
+                    },
+                },
+            },
+        });
+    }
+
+    async userMatchHostory(userId: string) {
+        return this.prisma.match.findMany({
+            where: { 
+                userId,
+                status: 'FINISHED'
+            },
+            orderBy: [
+                { updateAt: 'desc' }
+            ]
+        })
     }
 }

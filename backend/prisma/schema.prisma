@@ -20,29 +20,36 @@ model User {
 }
 
 model UserResult {
-  id            String @id @default(uuid())
-  result        Float
-  correctChars  Float
-  accuracy      Float
-  mistakes      Float
-  cpm           Float
-  user          User @relation(fields: [userId], references: [id])
-  userId        String
-  results       Match[]
+  id                  String @id @default(uuid())
+  wpm                 Float
+  correctChars        Int
+  accuracy            Float
+  mistakes            Int
+  cpm                 Float
+  user                User @relation(fields: [userId], references: [id])
+  userId              String
+  results             Match?
 
   @@map("user_result")
 }
 
 model Match {
   id        String @id @default(uuid())
-  status    String @default("PENDING")
-  time      Int
+  status    MatchStatus @default(PENDING)
+  time      Int @default(60)
   user      User @relation(fields: [userId], references: [id])
   userId    String
   result    UserResult? @relation(fields: [resultId], references: [id])
-  resultId  String?
+  resultId  String? @unique
   createdAt DateTime @default(now())
   updateAt  DateTime @updatedAt
 
   @@map("match")
+}
+
+enum MatchStatus {
+  PENDING
+  ACTIVE
+  FINISHED
+  CANCELED
 }

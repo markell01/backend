@@ -1,10 +1,9 @@
-import { Body, ConflictException, Controller, Get, Post, Req, Res, Session, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Body, ConflictException, Controller, Get, Post, Req, Res, UnauthorizedException } from '@nestjs/common';
 import { RegistrationUsecase } from './usecases/registration.usecase';
 import { LoginUsecase } from './usecases/login.usecase';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
 import type { Request, Response } from 'express';
 import { LogoutUsecase } from './usecases/logout.usecase';
-import { SessionAuthGuard } from './guards/session-auth.guards';
 import { PrismaService } from '../utils/prisma.service';
 
 @Controller('auth')
