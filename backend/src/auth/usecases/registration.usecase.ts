@@ -12,6 +12,7 @@ export class RegistrationUsecase {
     ) {}
 
     async createUser(userData: RegisterDto) {
+        this.logger.log(`Creating user ${userData.username}`)
         if (await this.checkUserExist(userData.username)) {
             this.logger.error(`${userData.username} is already taken`);
             throw new ConflictException('Username is already taken');

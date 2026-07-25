@@ -43,8 +43,11 @@ export class MatchService {
     }
 
     async createMatch(data: MatchDto) {
+        this.logger.log(`Generating text...`);
         const text = await this.textGenerator();
+        this.logger.log(`Creating match for user: ${data.userId}...`);
         const match = await this.prisma.match.create({ data });
+        this.logger.log(`Match has been created`);
         return {
             match,
             text
@@ -52,7 +55,8 @@ export class MatchService {
     }
 
     async saveResult(data: SaveResultDto, id: string) {
-        return await this.prisma.$transaction(async (tx) => {
+        this.logger.log(`Saving result of the match: ${id} with data: ${JSON.stringify(data)}`);
+        const saveResult = await this.prisma.$transaction(async (tx) => {
             const result = await tx.userResult.create({ data });
 
             return tx.match.update({
@@ -63,9 +67,13 @@ export class MatchService {
                 },
             });
         });
+        
+        this.logger.log('Match has been saved');
+        return saveResult;
     }
 
     async updateMatchData(matchId: string) {
+        this.logger.log(`Updating match ${matchId}`)
         const result = await this.prisma.match.update({
             where: { id: matchId },
             data: { status: 'ACTIVE' }
@@ -75,11 +83,12 @@ export class MatchService {
             this.logger.error('Invalid match id');
             throw new BadRequestException();
         }
-
+        this.logger.log(`Match ${matchId} has been updated with status: ${result.status}`);
         return true;
     }
 
     async getBestUsers() {
+        this.logger.log(`Getting best users`);
         return this.prisma.userResult.findMany({
             orderBy: [
                 { wpm: 'desc' },

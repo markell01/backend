@@ -10,6 +10,7 @@ export class LoginUsecase {
     constructor(private readonly prisma: PrismaService) {}
 
     async login(userData: LoginDto) {
+        this.logger.log(`Trying to log in user: ${userData.username}`);
         const user = await this.prisma.user.findUnique({
             where: {
                 username: userData.username
@@ -26,6 +27,7 @@ export class LoginUsecase {
             throw new UnauthorizedException('Invalid credentials');
         }
 
+        this.logger.log(`User is logged in`);
         return {
             id: user.id,
             username: user.username
