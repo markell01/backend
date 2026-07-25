@@ -21,11 +21,10 @@ export default function LoginTab({ onSuccess }: LoginProps) {
     const data = { username, password };
 
     try {
-      await authService.login(data);
+      const response = await authService.login(data);
 
-      toast.success("Вы успешно вошли!", {
-        containerId: "app-toast",
-      });
+      localStorage.setItem("id", response.data.user.id);
+      localStorage.setItem("username", response.data.user.username);
 
       if (onSuccess) {
         onSuccess();
@@ -43,6 +42,7 @@ export default function LoginTab({ onSuccess }: LoginProps) {
       console.error(err);
     } finally {
       setIsLoading(false);
+      window.location.reload();
     }
   }
 
