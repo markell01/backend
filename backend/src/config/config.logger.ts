@@ -4,7 +4,7 @@ import { Injectable, ConsoleLogger, LoggerService } from "@nestjs/common";
 export class CustomLogger extends ConsoleLogger implements LoggerService { 
   constructor(context: string = 'Application') { 
     super();
-    this.setLogLevels(['warn', 'error', 'debug']);
+    this.setLogLevels(['log', 'warn', 'error', 'debug']);
     this.setContext(context); 
   }
 
