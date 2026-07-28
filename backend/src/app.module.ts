@@ -9,6 +9,8 @@ import { MatchService } from './match/match.service';
 import { CustomLogger } from './config/config.logger';
 import { createKeyv } from '@keyv/redis';
 import { CacheModule } from '@nestjs/cache-manager';
+import { TextGeneratorService } from './textGenerator/textGenerator.service';
+import { DuelsModule } from './duels/duels.module';
 
 @Module({
   imports: [
@@ -24,6 +26,7 @@ import { CacheModule } from '@nestjs/cache-manager';
         ttl: 60 * 1000,
       }),
     }),
+    DuelsModule
   ],
   controllers: [AuthController, MatchController],
   providers: [
@@ -32,6 +35,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     SessionAuthGuard,
     MatchService,
     CustomLogger,
+    TextGeneratorService
   ],
 })
 export class AppModule {}

@@ -1,54 +1,22 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { readFile } from 'fs/promises';
-import { join } from 'path';
 import { MatchDto, SaveResultDto } from './dto/match.dto';
 import { PrismaService } from '../config/prisma.service';
 import { CustomLogger } from '../config/config.logger';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
+import { TextGeneratorService } from '../textGenerator/textGenerator.service';
 
 @Injectable()
 export class MatchService {
   private readonly logger = new CustomLogger(MatchService.name);
   constructor(
+    private readonly textGeneratorService: TextGeneratorService,
     private readonly prisma: PrismaService,
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache
   ) {}
 
-  private async textGenerator() {
-    const filePath = join(process.cwd(), 'public', 'text.txt');
-
-    const text = (await readFile(filePath, 'utf8'))
-      .split(/\r?\n/)
-      .map((line) => line.trim())
-      .filter(Boolean);
-
-    const words: string[] = [];
-    const wordLimit = this.getWordLimit();
-
-    while (words.length < wordLimit) {
-      words.push(text[this.getRandomInt(text.length)]);
-    }
-
-    return words.join(' ');
-  }
-
-  private getWordLimit() {
-    const limit = Number(process.env.WORD_LIMIT);
-
-    if (!Number.isFinite(limit) || limit <= 0) {
-      return 300;
-    }
-
-    return limit;
-  }
-
-  private getRandomInt(length: number) {
-    return Math.floor(Math.random() * length);
-  }
-
   async createMatch(data: MatchDto) {
     this.logger.log(`Generating text...`);
-    const text = await this.textGenerator();
+    const text = await this.textGeneratorService.textGenerator();
     this.logger.log(`Creating match for user: ${data.userId}...`);
     const match = await this.prisma.match.create({ data });
     this.logger.log(`Match has been created`);

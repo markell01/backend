@@ -1,30 +1,36 @@
 import { Injectable, ConsoleLogger, LoggerService } from "@nestjs/common";
 
+const colors = {
+  reset: '\x1b[0m',
+  red: '\x1b[31m',
+  yellow: '\x1b[33m',
+  green: '\x1b[32m',
+  cyan: '\x1b[36m',
+  gray: '\x1b[90m',
+};
+
 @Injectable() 
 export class CustomLogger extends ConsoleLogger implements LoggerService { 
   constructor(context: string = 'Application') { 
-    super();
+    super(context, { colors: false });
+
     this.setLogLevels(['log', 'warn', 'error', 'debug']);
     this.setContext(context); 
   }
 
-  log(message: string) {
-    super.log(message); 
-  } 
+  error(message: string, trace?: string, context?: string) {
+    super.error(`${colors.red}${message}${colors.reset}`, trace, context);
+  }
 
-  error(message: string) {
-    super.error(message) 
-  } 
+  warn(message: string, context?: string) {
+    super.warn(`${colors.yellow}${message}${colors.reset}`, context);
+  }
 
-  warn(message: string) {
-    super.warn(message); 
-  } 
+  log(message: string, context?: string) {
+    super.log(`${colors.green}${message}${colors.reset}`, context);
+  }
 
-  debug(message: string) {
-    super.debug(message); 
-  } 
-
-  verbose(message: string) {
-    super.verbose(message); 
-  } 
+  debug(message: string, context?: string) {
+    super.debug(`${colors.cyan}${message}${colors.reset}`, context);
+  }
 }
