@@ -8,6 +8,7 @@ import { useAuthModal } from "./context/AuthModalContext";
 import AuthModalContainer from "./components/AuthModalContainer";
 import Home from "./pages/Home";
 import Match from "./pages/Match";
+import Duel from "./pages/Duel";
 
 function App() {
   const { isOpen, openAuthModal, closeAuthModal } = useAuthModal();
@@ -30,6 +31,14 @@ function App() {
       element: (
         <Layout>
           <Match />
+        </Layout>
+      ),
+    },
+    {
+      path: "/duel/:duelId",
+      element: (
+        <Layout>
+          <Duel />
         </Layout>
       ),
     },
