@@ -11,7 +11,7 @@ export class MatchService {
   constructor(
     private readonly textGeneratorService: TextGeneratorService,
     private readonly prisma: PrismaService,
-    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
   ) {}
 
   async createMatch(data: MatchDto) {

@@ -2,10 +2,14 @@
 import { User, Swords, Lock } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { io, Socket } from "socket.io-client"; // 1. Импортируем Socket.IO
+import { toast } from "react-toastify";
 import { leaderBoardService } from "../services/leaderBoard.service";
 import Leaderboard from "../components/home/Leaderboard";
 import MatchButton from "../components/home/MatchButton";
 import { useNavigate } from "react-router";
+
+const SOCKET_URL =
+  import.meta.env.VITE_API_URL ?? "http://192.168.0.158:3000";
 
 export const Home = () => {
   const [leaderboard, setLeaderboard] = useState([]);
@@ -37,6 +41,13 @@ export const Home = () => {
       return;
     }
 
+    const userId = localStorage.getItem("id");
+
+    if (!userId) {
+      toast.error("Войдите в аккаунт, чтобы искать дуэль.");
+      return;
+    }
+
     setIsSearchingDuel(true);
     setSearchTime(0);
 
@@ -45,11 +56,9 @@ export const Home = () => {
       setSearchTime((prev) => prev + 1);
     }, 1000);
 
-    const userId = localStorage.getItem("id");
-
     // 3. Подключаемся через socket.io-client
     // В Socket.IO пространствa имён (namespaces) указываются в URL, а query-параметры — в объекте опций
-    const socket = io("http://192.168.0.158:3000/duels", {
+    const socket = io(`${SOCKET_URL}/duels`, {
       autoConnect: true,
       withCredentials: true,
     });
@@ -70,8 +79,17 @@ export const Home = () => {
       navigate(`/duel/${data.duelId}`);
     });
 
+    socket.on("waitingForOpponent", () => {
+      console.log("Ожидание соперника для дуэли");
+    });
+
+    socket.on("duelError", (data: { message: string }) => {
+      toast.error(data.message || "Ошибка поиска дуэли");
+      stopDuelSearch();
+    });
+
     // Обработка ошибок
-    socket.on("connect_error", (error) => {
+    socket.on("connect_error", (error: Error) => {
       console.error("Ошибка подключения Socket.IO:", error);
       stopDuelSearch();
     });

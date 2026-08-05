@@ -6,8 +6,8 @@ import { useEffect } from "react";
 import { registerModalTrigger } from "./services/instance";
 import { useAuthModal } from "./context/AuthModalContext";
 import AuthModalContainer from "./components/AuthModalContainer";
-import Home from "./pages/Home";
-import Match from "./pages/Match";
+import Home from "./pages/home";
+import Match from "./pages/match";
 import Duel from "./pages/Duel";
 
 function App() {

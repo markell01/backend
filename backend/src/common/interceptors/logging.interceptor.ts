@@ -3,6 +3,12 @@ import { Observable, tap } from "rxjs";
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
+    log(arg0: string) {
+        throw new Error("Method not implemented.");
+    }
+    warn(arg0: string) {
+        throw new Error("Method not implemented.");
+    }
     private readonly logger = new Logger(LoggingInterceptor.name);
 
     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
