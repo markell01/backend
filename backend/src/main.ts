@@ -6,6 +6,7 @@ import { PgStore, pool } from './config/pg.service';
 import { CustomLogger } from './config/config.logger';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { FRONTEND_ORIGINS } from './config/cors.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,7 +17,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new LoggingInterceptor());
 
   app.enableCors({
-    origin: 'http://192.168.0.144:5173',
+    origin: FRONTEND_ORIGINS,
     credentials: true,
   });
 

@@ -14,13 +14,14 @@ import {
   UpdateUserProgressDto,
 } from './dto/duel.dto';
 import DuelsService from './duels.service';
+import { FRONTEND_ORIGINS } from '../config/cors.config';
 
 const DUEL_COUNTDOWN_MS = 3_000;
 const PROGRESS_TICK_MS = 1_000;
 
 @WebSocketGateway({
   cors: {
-    origin: 'http://192.168.0.144:5173',
+    origin: FRONTEND_ORIGINS,
     credentials: true,
   },
   namespace: 'duels',
